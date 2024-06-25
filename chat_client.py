@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Script del Client Chat GUI Avanzato usando Tkinter
-Corso: Programmazione di Reti - Università di Bologna
+Enhanced GUI Chat Client Script using Tkinter
+Course: Network Programming - University of Bologna
 """
 
 import socket
@@ -20,7 +20,7 @@ def ricevi_messaggi():
             chat_display.insert(tk.END, msg + "\n")
             chat_display.config(state=tk.DISABLED)
             chat_display.yview(tk.END)
-        except OSError:  # Possibile che il client abbia lasciato la chat
+        except OSError:  # Forse il client ha lasciato la chat
             break
         except Exception as e:
             messagebox.showerror("Errore", f"Si è verificato un errore: {e}")
@@ -39,12 +39,12 @@ def invia_messaggio(event=None):
         messagebox.showerror("Errore", f"Si è verificato un errore: {e}")
 
 def on_close(event=None):
-    """Gestisce la chiusura della finestra della chat."""
+    """Gestisce la chiusura della finestra di chat."""
     user_message.set("(quit)")
     invia_messaggio()
 
 def connetti_al_server():
-    """Gestisce la connessione al server della chat."""
+    """Gestisce la connessione al server di chat."""
     global client_socket
     SERVER_HOST = server_host.get()
     SERVER_PORT = port.get()
@@ -55,7 +55,7 @@ def connetti_al_server():
         try:
             SERVER_PORT = int(SERVER_PORT)
         except ValueError:
-            messagebox.showerror("Porta Non Valida", "La porta deve essere un numero intero.")
+            messagebox.showerror("Porta non valida", "La porta deve essere un numero intero.")
             return
     
     ADDR = (SERVER_HOST, SERVER_PORT)
@@ -67,11 +67,11 @@ def connetti_al_server():
         recv_thread.start()
         connect_button.config(state=tk.DISABLED)
     except Exception as e:
-        messagebox.showerror("Errore di Connessione", f"Impossibile connettersi al server: {e}")
+        messagebox.showerror("Errore di connessione", f"Impossibile connettersi al server: {e}")
 
-# Crea e configura la finestra della chat
+# Creazione e configurazione della finestra di chat
 chat_window = tk.Tk()
-chat_window.title("Chat di Programmazione di Reti")
+chat_window.title("Network Programming Chat")
 
 server_frame = tk.Frame(chat_window)
 tk.Label(server_frame, text="Server Host:").pack(side=tk.LEFT)
@@ -88,7 +88,7 @@ msg_frame = tk.Frame(chat_window)
 user_message = tk.StringVar()  # Per i messaggi da inviare
 scrollbar = tk.Scrollbar(msg_frame)
 
-# Crea un widget ScrolledText per una migliore visualizzazione dei messaggi
+# Creazione di un widget ScrolledText per una migliore visualizzazione dei messaggi
 chat_display = scrolledtext.ScrolledText(msg_frame, wrap=tk.WORD, height=15, width=50, yscrollcommand=scrollbar.set, state=tk.DISABLED)
 scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 chat_display.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
@@ -104,8 +104,8 @@ input_frame.pack(pady=10, padx=10)
 
 chat_window.protocol("WM_DELETE_WINDOW", on_close)
 
-# Inizializza il socket
+# Inizializzazione del socket
 client_socket = None
 BUF_SIZE = 1024
 
-tk.mainloop()  # Avvia il loop della GUI
+tk.mainloop()  # Avvio del loop GUI

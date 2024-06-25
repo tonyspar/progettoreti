@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-Script del Server Chat Concorrente
-Corso: Programmazione di Reti - Università di Bologna
+Concurrent Chat Server Script
+Course: Network Programming - University of Bologna
 """
 
 import socket
 from threading import Thread
 
 def accetta_connessioni_client():
-    """Ascolta le connessioni in ingresso dai client."""
+    """Gestisce l'ascolto delle connessioni in ingresso dai client."""
     while True:
         try:
             client_conn, client_addr = server.accept()
@@ -17,16 +17,15 @@ def accetta_connessioni_client():
             indirizzi[client_conn] = client_addr
             Thread(target=gestore_client, args=(client_conn,)).start()
         except Exception as e:
-            print(f"Errore nell'accettare connessioni: {e}")
-            break
+            print(f"Errore nell'accettare la connessione: {e}")
 
 def gestore_client(client):
-    """Gestisce i messaggi di un singolo client."""
+    """Gestisce i messaggi provenienti da un singolo client."""
     try:
         nome = client.recv(BUF_SIZE).decode("utf8")
         benvenuto = f"Ciao {nome}! Digita (quit) per uscire dalla chat."
         client.send(benvenuto.encode("utf8"))
-        notifica_tutti(f"{nome} si è unito alla chat!")
+        notifica_tutti(f"{nome} si è unito alla chat!".encode("utf8"))
         client_list[client] = nome
 
         while True:
@@ -37,15 +36,14 @@ def gestore_client(client):
                 client.send("(quit)".encode("utf8"))
                 client.close()
                 del client_list[client]
-                notifica_tutti(f"{nome} ha lasciato la chat.")
+                notifica_tutti(f"{nome} ha lasciato la chat.".encode("utf8"))
                 break
     except Exception as e:
-        print(f"Errore nella gestione del client {client}: {e}")
-        if client in client_list:
-            notifica_tutti(f"{client_list[client]} ha lasciato la chat.")
-            del client_list[client]
-    finally:
+        print(f"Errore nel gestire il client: {e}")
         client.close()
+        if client in client_list:
+            del client_list[client]
+            notifica_tutti(f"{nome} ha lasciato la chat a causa di un errore.".encode("utf8"))
 
 def notifica_tutti(messaggio, prefisso=""):
     """Invia un messaggio a tutti i client connessi."""
@@ -53,7 +51,7 @@ def notifica_tutti(messaggio, prefisso=""):
         try:
             sock.send(prefisso.encode("utf8") + messaggio)
         except Exception as e:
-            print(f"Errore nell'invio del messaggio a {sock}: {e}")
+            print(f"Errore nell'invio del messaggio a un client: {e}")
 
 client_list = {}
 indirizzi = {}
@@ -64,12 +62,19 @@ BUF_SIZE = 1024
 ADDR = (HOST, PORT)
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # Imposta SO_REUSEADDR
 server.bind(ADDR)
 
 if __name__ == "__main__":
     server.listen(5)
-    print("Il server è in esecuzione e in attesa di connessioni...")
-    accept_thread = Thread(target=accetta_connessioni_client)
-    accept_thread.start()
-    accept_thread.join()
-    server.close()
+    print("Server in esecuzione, in attesa di connessioni...")
+    try:
+        accetta_thread = Thread(target=accetta_connessioni_client)
+        accetta_thread.start()
+        accetta_thread.join()
+    except KeyboardInterrupt:
+        print("Server interrotto dall'utente")
+    except Exception as e:
+        print(f"Errore nel thread di accettazione: {e}")
+    finally:
+        server.close()
